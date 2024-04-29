@@ -91,10 +91,6 @@ $$ P_{middle} = \{ p_i \in \Gamma  | dist(p_i, p_{middle}) \leq dist(p_j, p_{mid
 
 ![increase](asset/square_comparison.png)
 
-## What can be done better
-
-
-
 ## Failed attempts
 
 ### Object Area Normalisation (OAN)
