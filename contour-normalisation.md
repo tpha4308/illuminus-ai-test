@@ -1,9 +1,5 @@
----  
-title: Contour Normalisation    
-author: Pham Thi Thanh Thao    
-date: 29/04/2024    
----  
-  
+# Contour Nomalisation
+
 ## Pre-process & initial contour  
   
 The binary mask image is read by OpenCV and any holes will be filled with scipy. Then, an initial set of contours will be generated using `cv2.findCountours()`. This is often a large set with continuous points highlighting the entire boundary of the object.   
@@ -36,28 +32,28 @@ First, the centroid of each bounded object is computed by taking the mean of all
   
 $$ G =\Big( \frac{(\sum x_i)}{m}, \frac{(\sum y_i)}{m}  \Big) $$   
   
-First, two initial points are selected by choosing the point farthest from centroid called `P1` and a point farthest from itself called `PN`. Both will be added to the normalised contour list. Using these two points, the inital contour can be separated into two curve segments, each starting and ending by these two points, respectively. RDP will then be performed on each of these segments. 
+First, two initial points are selected by choosing the point farthest from the centroid called `P1` and the point farthest from itself called `PN`. Both will be added to the normalised contour list. Using these two points, the initial contour can be separated into two curve segments, each starting and ending by these two points, respectively. RDP will then be performed on each of these segments. 
 
 ### RDP algorithm
-RDP is simple yet powerful since it focuses on preserving the original shape of the curve. The algorithm works on a curve segment composed of points $(P_1, P_2, ..., P_N)$. With each point $(P_2, ..., P_{N-1})$, it computes the distance of said point to the line connected $(P_1, P_N)$. The point $P_i$ with the maximum distance is the largest deviance from the current curve segment. If the distance is larger than a pre-determined value $\epsilon$, said point $P_i$ is considered to be important to the preservance of the original shape, and added to the list of normalised contour. The curve segment is then divided at said $P_i$, each added to the `curve_segment_queue` to be processed as described. 
+RDP is simple yet powerful since it focuses on preserving the original shape of the curve. The algorithm works on a curve segment composed of points $(P_1, P_2, ..., P_N)$. With each point $(P_2, ..., P_{N-1})$, it computes the distance of said point to the line connected $(P_1, P_N)$. The point $P_i$ with the maximum distance is the largest deviance from the current curve segment. If the distance is larger than a pre-determined value $\epsilon$, said point $P_i$ is considered to be important to preserving the original shape, and added to the normalised contour. The curve segment is then divided at said $P_i$, each added to the `curve_segment_queue` to be processed as described. 
 
 ### Epsilon
-At this point, we are intoduced to the first limitation of the RDP algorithm, $\epsilon$. With smaller values of $\epsilon$, more contour points will be considered as it allows more granularity or focuses on fidelity to the original shape. On the contrary, large values of $\epsilon$ preserves less details, only the general outline of the original shape is kept. Thus, relying on the RDP algorithm alone does not ensure the normalised contour has the pre-determined length. 
+At this point, we are introduced to the first limitation of the RDP algorithm, $\epsilon$. With smaller values of $\epsilon$, more contour points will be considered as it allows more granularity or focuses on fidelity to the original shape. On the contrary, large values of $\epsilon$ preserve fewer details, only the general outline of the original shape is kept. Thus, relying on the RDP algorithm alone does not ensure the normalised contour has the pre-determined length. 
 
 By decreasing $\epsilon$ gradually, we can increase the contour length until a minimum of N is met.  If after $\epsilon$ reaches 0 and the pre-determined length N is still not met, then linear interpolation is applied. On the other hand, if the normalised length resulted to be above N, then further normalisation is applied. 
   
 ## Further decrease contour length   
-There were two methods implemented for further decreasing contour length, each with its own focus. 
+There were three methods implemented for further decreasing contour length, each with its strengths and drawbacks. 
 
 ### Removing contour points from (relatively) straight segments
 
-An intuitive way in further normalising contours is to use an inverse logic to that of RDP, that is, looking for segments with minimal change in angle and remove contour points within that area.   
+An intuitive way to further normalising contours is to use an inverse logic to that of RDP, that is, looking for segments with minimal change in angle and removing contour points within that area.   
 
 For every three consecutive contour points $p_1$, $p_3$ and $p_2$, compute the distance between $p_3$ and the line connecting $(p_1, p_2)$. Ones with smaller distances are visually relatively straight, i.e. removal of $p_3$ will not lose much information on the original shape on the segment connecting $p_1$ and $p_2$.
-This method performs generally good across examples with simple contour shape.
+This method performs generally well across examples with simple contour shapes.
 ![decrease-angle](asset/71_comparison_straight.png)
 
-However, it struggles in cases where multiple objects clustered together or ones with more complicated. A big error in this approach is the statement that "Ones with smaller distances are visually relatively straight". This statement follows the assumption that the line segment is ordered $p_1$, $p_3$, and $p_2$. With $p_3$ spatially in between $p_1$ and $p_2$. However, this is not always true. Thus, for cases with crooks and crannies, this method can struggle in preserving the original shape. 
+However, it struggles in cases where multiple objects are clustered together or ones with more complicated. A big error in this approach is the statement that "Ones with smaller distances are visually relatively straight". This statement follows the assumption that the line segment is ordered $p_1$, $p_3$, and $p_2$. With $p_3$ spatially in between $p_1$ and $p_2$. However, this is not always true. Thus, in cases with crooks and crannies, this method can struggle to preserve the original shape. 
 
 ![decrease-angle](asset/206_comparison_straight.png)
 
@@ -89,7 +85,7 @@ After $\epsilon$ reaches zero, if the pre-determined length is still not met, th
 $$ p_{middle} = \Big(\frac{p_{1x} + p_{2x}}{2}, \frac{p_{1y} + p_{2y}}{2} \Big) $$
 -  From the mean coordinate, get the actual contour point from the original contour list that is closest to the mean coordinate.
 $$ P_{middle} = \{ p_i \in \Gamma  | dist(p_i, p_{middle}) \leq dist(p_j, p_{middle}) \forall p_j \in \Gamma \} $$
-- For the pair with the maximum distance, we check if $P_{middle}$ already exists in the normalised contour. If not, we add $P_{middle}$ to the normalised contour. If yes, we move on to the pair with second most distance. 
+- For the pair with the maximum distance, we check if $P_{middle}$ already exists in the normalised contour. If not, we add $P_{middle}$ to the normalised contour. If yes, we move on to the pair with the second most distance. 
 
 ![increase](asset/39_GT_comparison.png)
 
@@ -103,9 +99,9 @@ $$ P_{middle} = \{ p_i \in \Gamma  | dist(p_i, p_{middle}) \leq dist(p_j, p_{mid
 
 ### Object Area Normalisation (OAN)
 
-An implementation of OAN described by Paramarthalingam et al. was attempted[1]. This algorithm is fairly intuitive and quite robust in terms of ensuring the normalised contour have the pre-determined shape of N. 
+An implementation of OAN described by Paramarthalingam et al. was attempted[1]. This algorithm is fairly intuitive and quite robust in terms of ensuring the normalised contour has the pre-determined shape of N. 
 
-It involves divide the shape into N sectors, each with an area of $S_{part}$, where S is the total area, and N the desired length of the normalised contour.
+It involves dividing the shape into N sectors, each with an area of $S_{part}$, where S is the total area, and N is the desired length of the normalised contour.
 $$ S_{part} = \frac{S}{N} $$
 
 By traversing along the contour, at some contour point $p_i$, if the traversed area has the sector area equivalent $S_{part}$, we add said point to the normalised contour and start a new sector. 
@@ -115,4 +111,4 @@ A major drawback of this approach is that it does not take into consideration th
 ![oan](asset/OAN.png)
 
 # Reference 
-[1] Paramarthalingam, Arjun & T. T, Mirnalinee. (2020). Extraction of compact boundary normalisation based geometric descriptors for affine invariant shape retrieval. Image Processing, IET. 15. 1093–1104. 10.1049/ipr2.12088. 
+[1] Paramarthalingam, Arjun & T. T, Mirnalinee. (2020). Extraction of compact boundary normalisation-based geometric descriptors for affine invariant shape retrieval. Image Processing, IET. 15. 1093–1104. 10.1049/ipr2.12088. 

@@ -172,22 +172,6 @@ def visualise_comparison(img_path, og_img, img, normalised_contour_ls_w_comparis
     plt.savefig(f"{img_name}_comparison_{decrease_method}.png")
 
 
-# def visualise_contour(img_path, og_img, contour_ls, original=False):
-#     colour = (23, 166, 209)
-#     img_w_contour = cv2.drawContours(og_img.copy(), contour_ls, -1, color=colour, thickness=2, lineType=cv2.LINE_AA)
-#     img_name = img_path.split('.')[0].split('/')[-1]
-#
-#     for contour in contour_ls:
-#         contour = np.squeeze(contour)
-#         for point in contour:
-#             img_w_contour = cv2.circle(img=img_w_contour, center=point, radius=2, color=colour, thickness=3)
-#
-#     if original:
-#         cv2.imwrite(f'{img_name}_original.png', img_w_contour)
-#     else:
-#         cv2.imwrite(f'{img_name}_normalised_2.png', img_w_contour)
-
-
 if __name__ == "__main__":
     import argparse
 
