@@ -26,6 +26,8 @@ def find_closest_point_kdtree(point, contour):
 
 
 def check_exists(point, contour):
+    # Check if point exists in contour
+
     for contour_point in contour:
         if contour_point[0] == point[0] and contour_point[1] == point[1]:
             return True
@@ -65,7 +67,6 @@ def increase_contour_length(contour, normalised_set, N):
             p3, actual_contour_point_in_middle_index = find_closest_point_kdtree(point_in_middle, contour)
 
             d = np.linalg.norm(p2 - p1)
-
             if d > max_d and not check_exists(p3, normalised_set):
                 max_d = d
                 to_add = p3
@@ -80,9 +81,12 @@ def increase_contour_length(contour, normalised_set, N):
 
 
 def reorder_contour(contour, normalised_set):
+    # reorder the contour points in normalised set to match the ordering in contour
+
     normalised_set_ordered = []
 
     for elem in contour:
+        elem = np.squeeze(elem)
         for contour_point in normalised_set:
             if contour_point[0] == elem[0] and contour_point[1] == elem[1]:
                 normalised_set_ordered.append(contour_point)
@@ -156,7 +160,7 @@ def decrease_contour_length_angle(normalised_set, N):
 
 
 def decrease_contour_length_area(contour, normalised_set, N):
-    # Remove the contour points that results in least changes in total area when removed
+    # Remove the contour points that results in the least changes in total area when removed
 
     og_area = calculate_total_area(contour)
 

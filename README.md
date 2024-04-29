@@ -1,7 +1,7 @@
 
 Files directory:
-- `contour-normalisation.md`: Report for question 1
-- `ai-video-generation.md`: Proposal for question 2
+- [contour-normalisation.md](contour-normalisation.md): Report for question 1
+- [ai-video-generation.md](ai-video-generation.md): Proposal for question 2
 
 Dataset:
 - Human Segmentation dataset: taken from https://github.com/VikramShenoy97/Human-Segmentation-Dataset/tree/master 

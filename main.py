@@ -31,7 +31,6 @@ def RDP(normalised_set, curve_segment_queue, epsilon, contour):
 
     # dequeue the current curve segment
     curve_segment_queue.pop(0)
-    # print("Farthest distance", farthest_distance)
 
     # if the farthest distance above epsilon then add two half segments to queue
     if farthest_distance >= epsilon:
@@ -43,6 +42,8 @@ def RDP(normalised_set, curve_segment_queue, epsilon, contour):
 
 
 def reorder_contour(contour, normalised_set):
+    # reorder the contour points in normalised set to match the ordering in contour
+
     normalised_set_ordered = []
 
     for elem in contour:
@@ -56,8 +57,10 @@ def reorder_contour(contour, normalised_set):
 
 
 def get_normalised_set(contour, N, epsilon=20):
+    # computing centroid
     centroid = np.mean(contour, axis=0)[0]
 
+    # divide the object to two separate curves
     P1, P1_index = compute_farthest_point(centroid, contour)
     contour = np.vstack((contour[P1_index:], contour[:P1_index]))
 
@@ -67,7 +70,10 @@ def get_normalised_set(contour, N, epsilon=20):
     curve_segment_queue = [{"start": 0, "end": farthest_from_P1_index},
                            {"start": farthest_from_P1_index, "end": len(contour) - 1}]
 
+    # apply RDP
     normalised_set = RDP(normalised_set, curve_segment_queue, epsilon, contour)
+
+    # gradually increase the length of normalised contour to meet N
     while len(normalised_set) < N:
         epsilon -= 3
         if epsilon < 0:
@@ -94,6 +100,7 @@ def get_normalised_contour_pipeline(img_path, N, decrease_method="angle"):
     normalised_contour_ls = []
     normalised_contour_ls_w_comparison = []
 
+    # remove faulty contours
     max_contour_length = max([len(contour) for contour in contours])
     contours = [contour for contour in contours if len(contour)>0.1*max_contour_length]
 
@@ -103,6 +110,7 @@ def get_normalised_contour_pipeline(img_path, N, decrease_method="angle"):
         normalised_set = get_normalised_set(contour, N)
         normalised_set_N = None
 
+        # further decrease, if needed
         if len(normalised_set) > N:
             if decrease_method == "angle":
                 normalised_set_N = decrease_contour_length_angle(normalised_set, N)
@@ -111,6 +119,7 @@ def get_normalised_contour_pipeline(img_path, N, decrease_method="angle"):
             elif decrease_method == "area":
                 normalised_set_N = decrease_contour_length_area(contour, normalised_set, N)
 
+        # increase, if needed
         elif len(normalised_set) < N:
             normalised_set_N = increase_contour_length(contour, normalised_set, N)
 
@@ -180,13 +189,9 @@ if __name__ == "__main__":
     parser.add_argument('--N', type=int, help='Pre-determined contour length')
     parser.add_argument('--decrease_method', type=str, help='Path to binary image', default="angle")
 
-    # TODO: add help here
-
     args = parser.parse_args()
     img_path = args.img_path
     N = args.N
     decrease_method = args.decrease_method
-
-    print(img_path, N, decrease_method)
 
     normalised_contour_ls = get_normalised_contour_pipeline(img_path, N, decrease_method)
