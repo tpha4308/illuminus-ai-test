@@ -13,5 +13,5 @@ python main.py --img_path square.jpg --N 10 --decrease_method angle
 ```
 where
 - `img_path`: relative path to the binary mask image
-- N: desired contour length
+- `N`: desired contour length
 - Decrease method: methods in decreasing contour length, available methods inclue `angle`, `straight`, and `area`.
